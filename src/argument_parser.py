@@ -3,12 +3,14 @@
 import argparse
 import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from .config import Config
 
 
 COORDINATE_RE = re.compile(
-    r"^[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.+-]+$"
+    r"^[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.+-]+"
+    r"(?::[A-Za-z0-9_.-]+)?$"
 )
 
 
@@ -37,6 +39,11 @@ def _add_output_arguments(parser: argparse.ArgumentParser) -> None:
         "--ascii",
         action="store_true",
         help="Вывести зависимости в виде ASCII-дерева",
+    )
+    parser.add_argument(
+        "--direct",
+        action="store_true",
+        help="Вывести только прямые зависимости пакета",
     )
     parser.add_argument(
         "--filter",
@@ -94,9 +101,21 @@ def _validate_repository(parser, repository: str, test_mode: bool) -> str:
             parser.error("--test-mode ожидает JSON-файл с описанием графа")
         return str(path.resolve())
 
-    if not repository.startswith(("https://", "http://")):
+    parsed = urlsplit(repository)
+    try:
+        valid_port = parsed.port is None or 1 <= parsed.port <= 65535
+    except ValueError:
+        valid_port = False
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.hostname
+        or not valid_port
+        or parsed.username
+        or parsed.password
+    ):
         parser.error(
-            "для реального режима --repository должен быть HTTP(S)-URL"
+            "для реального режима --repository должен быть корректным "
+            "HTTP(S)-URL без логина и пароля"
         )
     return repository.rstrip("/")
 
@@ -114,6 +133,7 @@ def parse_args(argv=None) -> Config:
         repository=repository,
         test_mode=args.test_mode,
         ascii_tree=args.ascii,
+        direct_only=args.direct,
         filter_substring=args.filter,
         show_order=args.order,
         show_config=args.show_config,
@@ -126,6 +146,7 @@ def print_config(config: Config) -> None:
     print(f"repository={config.repository}")
     print(f"test_mode={config.test_mode}")
     print(f"ascii={config.ascii_tree}")
+    print(f"direct={config.direct_only}")
     print(f"filter={config.filter_substring}")
     print(f"order={config.show_order}")
     print(f"show_config={config.show_config}")

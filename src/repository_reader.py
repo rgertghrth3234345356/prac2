@@ -29,11 +29,14 @@ class MavenRepositoryReader:
 
     @staticmethod
     def _coordinates(value: str) -> tuple[str, str, str]:
-        """Разделить координаты Maven на три обязательные части."""
+        """Разделить Maven-координаты; classifier не меняет путь POM."""
         parts = value.split(":")
-        if len(parts) != MAVEN_COORDINATE_PARTS:
+        if len(parts) not in {MAVEN_COORDINATE_PARTS, 4} or any(
+            not part for part in parts
+        ):
             raise ValueError(
-                "Ожидаются координаты groupId:artifactId:version"
+                "Ожидаются координаты groupId:artifactId:version "
+                "или groupId:artifactId:version:classifier"
             )
         return parts[0], parts[1], parts[2]
 
@@ -218,11 +221,13 @@ class MavenRepositoryReader:
 
         if not version:
             version = management.get((group, artifact), "")
-        if not group or not artifact or not version or optional:
+        if not group or not artifact or not version:
             return None
         if scope in EXCLUDED_SCOPES:
             return None
-        return PackageInfo(group, artifact, version, scope, classifier)
+        return PackageInfo(
+            group, artifact, version, scope, classifier, optional
+        )
 
     @classmethod
     def _read_dependencies(
