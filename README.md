@@ -30,7 +30,7 @@ Java-пакетов из Maven-репозитория. POM-файлы загру
 Запуск из корневого каталога проекта:
 
 ```bash
-python -m src.main --package A --repository test-repository.json --test-mode
+py -m src.main --package A --repository test-repository.json --test-mode
 ```
 
 На Windows можно использовать `run.bat`. При запуске без аргументов он
@@ -70,7 +70,7 @@ https://repo.maven.apache.org/maven2
 ### Этап 1. Проверка параметров CLI
 
 ```bash
-python -m src.main --package A --repository test-repository.json --test-mode --ascii --filter TEST --show-config
+py -m src.main --package A --repository test-repository.json --test-mode --ascii --filter TEST --show-config
 ```
 
 ### Этап 2. Прямые зависимости
@@ -84,14 +84,14 @@ python -m src.main --package A --repository test-repository.json --test-mode --d
 Реальный Maven-пакет:
 
 ```bash
-python -m src.main --package org.slf4j:slf4j-simple:2.0.13 --repository https://repo.maven.apache.org/maven2 --direct
+py -m src.main --package org.slf4j:slf4j-simple:2.0.13 --repository https://repo.maven.apache.org/maven2 --direct
 ```
 
 ### Этап 3. Транзитивный граф, фильтр и циклы
 
 ```bash
-python -m src.main --package A --repository test-repository.json --test-mode
-python -m src.main --package A --repository test-repository.json --test-mode --filter E
+py -m src.main --package A --repository test-repository.json --test-mode
+py -m src.main --package A --repository test-repository.json --test-mode --filter E
 ```
 
 В тестовом файле можно создать цикл, например `A -> B -> C -> A`.
@@ -101,7 +101,7 @@ DFS завершится, а циклическое ребро останетс�
 ### Этап 4. Порядок загрузки
 
 ```bash
-python -m src.main --package A --repository test-repository.json --test-mode --order
+py -m src.main --package A --repository test-repository.json --test-mode --order
 ```
 
 Алгоритм выводит зависимости раньше пакетов, которые от них зависят. Для
@@ -111,7 +111,7 @@ python -m src.main --package A --repository test-repository.json --test-mode --o
 ### Этап 5. Визуализация
 
 ```bash
-python -m src.main --package A --repository test-repository.json --test-mode --ascii
+py -m src.main --package A --repository test-repository.json --test-mode --ascii
 ```
 
 Mermaid-описание выводится всегда. ASCII-дерево добавляется только при
@@ -146,9 +146,9 @@ Mermaid-описание выводится всегда. ASCII-дерево д�
 `A`, `B` и `G`. Они создаются следующими командами:
 
 ```bash
-python -m src.main --package A --repository test-repository.json --test-mode
-python -m src.main --package B --repository test-repository.json --test-mode
-python -m src.main --package G --repository test-repository.json --test-mode
+py -m src.main --package A --repository test-repository.json --test-mode
+py -m src.main --package B --repository test-repository.json --test-mode
+py -m src.main --package G --repository test-repository.json --test-mode
 ```
 
 ## Сравнение со штатным Maven
@@ -196,28 +196,17 @@ version mediation и разрешение конфликтующих верси�
 Установить pytest (только для запуска тестов):
 
 ```bash
-python -m pip install pytest
-python -m pytest -q
+py -m pip install pytest
+py -m pytest -q
 ```
 
 Дополнительные тесты на стандартном `unittest`:
 
 ```bash
-python -m unittest discover -v
-```
+py -m unittest discover -v
+```git log --oneline
 
 Приложение не импортирует pytest и не зависит от сторонних библиотек.
 
-## История этапов
 
-История Git состоит ровно из пяти последовательных коммитов — по одному
-на каждый этап практической работы:
 
-1. `feat(stage-1): add configurable command-line interface` — CLI и конфигурация.
-2. `feat(stage-2): read direct dependencies from Maven POM files` — чтение Maven POM.
-3. `feat(stage-3): build transitive dependency graph with iterative DFS` — граф, DFS, фильтр и циклы.
-4. `feat(stage-4): calculate dependency installation order` — порядок загрузки зависимостей.
-5. `feat(stage-5): visualize dependency graph and document usage` — Mermaid, ASCII, примеры, документация и итоговые тесты.
-
-Сообщения коммитов используют формат Conventional Commits
-`type(scope): short description`.
