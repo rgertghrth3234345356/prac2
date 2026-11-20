@@ -11,6 +11,7 @@ class Config:
     repository: str
     test_mode: bool = False
     ascii_tree: bool = False
+    direct_only: bool = False
     filter_substring: str = ""
     show_order: bool = False
     show_config: bool = False

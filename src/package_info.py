@@ -12,6 +12,7 @@ class PackageInfo:
     version: str
     scope: str = "compile"
     classifier: str = ""
+    optional: bool = False
 
     @property
     def coordinates(self) -> str:
